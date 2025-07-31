@@ -4,6 +4,8 @@ M.setup = function()
 	local is_windows = require("core.global").is_windows
 
 	local lsp_deps = require("core.settings").lsp_deps
+	local use_python_experimental_lsp = require("core.settings").use_python_experimental_lsp
+	local python_experimental_lsp_deps = require("core.settings").python_experimental_lsp_deps
 	local mason_registry = require("mason-registry")
 	local mason_lspconfig = require("mason-lspconfig")
 
@@ -88,6 +90,30 @@ please REMOVE your LSP configuration (rust_analyzer.lua) from the `servers` dire
 		end
 	end
 
+	--- the LSP for python should be set up differently depend on the value of `use_python_experimental_lsp`.
+	--- If both `use_python_experimental_lsp` and `python_experimental_lsp_deps` are set,
+	--- we'll use the experimental LSP with the specified dependencies.
+	--- Otherwise, default `pylsp` will be used.
+	if use_python_experimental_lsp then
+		if not python_experimental_lsp_deps or #python_experimental_lsp_deps == 0 then
+			vim.notify(
+				[[
+If you want to use the experimental Python LSP,
+please set `python_experimental_lsp_deps` in your settings.
+Fallback to default `pylsp` now.]],
+				vim.log.levels.WARN,
+				{ title = "nvim-lspconfig" }
+			)
+		else
+			mason_lsp_handler("pylsp")
+		end
+	else
+		for _, exp_py_lsp in ipairs(python_experimental_lsp_deps) do
+			mason_lsp_handler(exp_py_lsp)
+		end
+		mason_lsp_handler("ruff") -- for linting and formatting as the exp LSPs do not support it
+	end
+
 	---A simplified mimic of <mason-lspconfig 1.x>'s `setup_handlers` callback.
 	---Invoked for each Mason package (name or `Package` object) to configure its language server.
 	---@param pkg string|{name: string} Either the package name (string) or a Package object
@@ -120,66 +146,29 @@ please REMOVE your LSP configuration (rust_analyzer.lua) from the `servers` dire
 		setup_lsp_for_package(pkg)
 	end
 
-	-- Hook into Mason's package install event to install extra plugins for pylsp (black, ruff, rope),
-	-- then configure the installed package's LSP using setup_lsp_for_package.
-	mason_registry:on(
-		"package:install:success",
-		vim.schedule_wrap(function(pkg)
-			if pkg.name == "python-lsp-server" then
-				local venv = vim.fn.stdpath("data") .. "/mason/packages/python-lsp-server/venv"
-				local python = is_windows and venv .. "/Scripts/python.exe" or venv .. "/bin/python"
-				local black = is_windows and venv .. "/Scripts/black.exe" or venv .. "/bin/black"
-				local ruff = is_windows and venv .. "/Scripts/ruff.exe" or venv .. "/bin/ruff"
-
-				require("plenary.job")
-					:new({
-						command = python,
-						args = {
-							"-m",
-							"pip",
-							"install",
-							"-U",
-							"--disable-pip-version-check",
-							"python-lsp-black",
-							"python-lsp-ruff",
-							"pylsp-rope",
-						},
-						cwd = venv,
-						env = { VIRTUAL_ENV = venv },
-						on_exit = function()
-							if vim.fn.executable(black) == 1 and vim.fn.executable(ruff) == 1 then
-								vim.notify(
-									"Finished installing pylsp plugins",
-									vim.log.levels.INFO,
-									{ title = "[lsp] Install Status" }
-								)
-							else
-								vim.notify(
-									"Failed to install pylsp plugins. [Executable not found]",
-									vim.log.levels.ERROR,
-									{ title = "[lsp] Install Failure" }
-								)
-							end
-						end,
-						on_start = function()
-							vim.notify(
-								"Now installing pylsp plugins...",
-								vim.log.levels.INFO,
-								{ title = "[lsp] Install Status", timeout = 6000 }
-							)
-						end,
-						on_stderr = function(_, msg_stream)
-							if msg_stream then
-								vim.notify(msg_stream, vim.log.levels.ERROR, { title = "[lsp] Install Failure" })
-							end
-						end,
-					})
-					:start()
-			end
-
-			setup_lsp_for_package(pkg)
-		end)
-	)
+	--- the LSP for python should be set up differently depend on the value of `use_python_experimental_lsp`.
+	--- If both `use_python_experimental_lsp` and `python_experimental_lsp_deps` are set,
+	--- we'll use the experimental LSP with the specified dependencies.
+	--- Otherwise, default `pylsp` will be used.
+	if use_python_experimental_lsp then
+		if not python_experimental_lsp_deps or #python_experimental_lsp_deps == 0 then
+			vim.notify(
+				[[
+If you want to use the experimental Python LSP,
+please set `python_experimental_lsp_deps` in your settings.
+Fallback to default `pylsp` now.]],
+				vim.log.levels.WARN,
+				{ title = "nvim-lspconfig" }
+			)
+		else
+			setup_lsp_for_package("pylsp")
+		end
+	else
+		for _, exp_py_lsp in ipairs(python_experimental_lsp_deps) do
+			setup_lsp_for_package(exp_py_lsp)
+		end
+		mason_lsp_handler("ruff") -- for linting and formatting as the exp LSPs do not support it
+	end
 end
 
 return M
