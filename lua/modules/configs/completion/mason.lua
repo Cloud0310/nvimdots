@@ -5,6 +5,7 @@ M.setup = function()
 		ui = require("modules.utils.icons").get("ui", true),
 		misc = require("modules.utils.icons").get("misc", true),
 	}
+	local mason_registry = require("mason-registry")
 
 	require("modules.utils").load_plugin("mason", {
 		ui = {

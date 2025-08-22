@@ -1,8 +1,6 @@
 local M = {}
 
 M.setup = function()
-	local is_windows = require("core.global").is_windows
-
 	local lsp_deps = require("core.settings").lsp_deps
 	local use_python_experimental_lsp = require("core.settings").use_python_experimental_lsp
 	local python_experimental_lsp_deps = require("core.settings").python_experimental_lsp_deps
