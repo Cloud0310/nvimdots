@@ -62,13 +62,14 @@ function M.get_prediction_config()
 	local pred_model = settings["pred-model"] or settings.pred_model
 	local pred_optional_params = settings["pred-optional-params"] or settings.pred_optional_params or {}
 
-	if adapter and adapter.type == "openai-compatible" then
+	if adapter and (adapter.type == "openai-compatible" or adapter.type == "openai-fim-compatible") then
 		return {
 			api_key = M.get_adapter_api_key(adapter),
 			end_point = M.get_adapter_endpoint(adapter),
 			model = pred_model or M.get_adapter_default_model(adapter),
 			name = adapter.name or M.get_prediction_adapter_name(),
 			optional = vim.tbl_deep_extend("force", adapter.optional or {}, pred_optional_params),
+			provider = adapter.type == "openai-fim-compatible" and "openai_fim_compatible" or "openai_compatible",
 		}
 	end
 

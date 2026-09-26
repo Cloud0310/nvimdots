@@ -16,7 +16,7 @@ settings["use_copilot"] = true
 ---@type string
 settings["ai_api_key"] = "AI_API_KEY"
 
--- Shared AI adapters for CodeCompanion and OpenAI-compatible edit prediction.
+-- AI adapters for CodeCompanion and Minuet prediction.
 -- Adapter `api_key` is optional; when omitted, `ai_api_key` is used.
 ---@type table<string, table>
 settings["ai_adapters"] = {
@@ -58,8 +58,7 @@ settings["ai_adapters"] = {
 		},
 		default_model = "deepseek-v4-pro",
 		optional = {
-			-- Disable thinking for DeepSeek-compatible APIs if needed:
-			-- thinking = { type = "disabled" },
+			thinking = { type = "disabled" },
 		},
 	},
 	openai = {
@@ -87,17 +86,17 @@ settings["codecompanion_adapter"] = "openrouter"
 ---@type "copilot"|"oai-compatible"
 settings["edit_prediction_source"] = "oai-compatible"
 
--- Default adapter for OpenAI-compatible edit prediction. Must be a key in `ai_adapters`.
+-- Default adapter for Minuet prediction. Must be a key in `ai_adapters`.
 -- The hyphenated key `pred-adapter` is also accepted in user settings.
 ---@type string
 settings["pred_adapter"] = "opencode"
 
--- Model used by OpenAI-compatible Minuet completion prediction.
+-- Model used by Minuet completion prediction.
 -- The hyphenated key `pred-model` is also accepted in user settings.
 ---@type string
 settings["pred_model"] = "deepseek-v4-flash"
 
--- Extra OpenAI-compatible request parameters for Minuet completion prediction.
+-- Extra request parameters for Minuet completion prediction.
 -- The hyphenated key `pred-optional-params` is also accepted in user settings.
 --
 -- Examples for disabling thinking/reasoning:
@@ -111,7 +110,6 @@ settings["pred_model"] = "deepseek-v4-flash"
 settings["pred_optional_params"] = {
 	top_p = 0.9,
 	max_tokens = 128,
-	{ thinking = { type = "disabled" } },
 }
 
 -- Set to false if you don't want to format on save.

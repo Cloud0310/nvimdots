@@ -113,10 +113,10 @@ function autocmd.load_autocmds()
 			-- Auto change directory
 			-- { "BufEnter", "*", "silent! lcd %:p:h" },
 			-- Auto toggle fcitx5
-			-- {"InsertLeave", "* :silent", "!fcitx5-remote -c"},
-			-- {"BufCreate", "*", ":silent !fcitx5-remote -c"},
-			-- {"BufEnter", "*", ":silent !fcitx5-remote -c "},
-			-- {"BufLeave", "*", ":silent !fcitx5-remote -c "}
+			{ "InsertLeave", "* :silent", "!fcitx5-remote -c" },
+			{ "BufCreate", "*", ":silent !fcitx5-remote -c" },
+			{ "BufEnter", "*", ":silent !fcitx5-remote -c " },
+			{ "BufLeave", "*", ":silent !fcitx5-remote -c " },
 		},
 		wins = {
 			-- Highlight current line only in focused window
