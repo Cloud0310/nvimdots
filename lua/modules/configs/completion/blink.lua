@@ -22,7 +22,7 @@ local source_labels = {
 	spell = "[SPELL]",
 }
 
-local sources_default = { "lazydev", "lsp", "snippets", "path", "buffer", "ripgrep", "spell", "tmux", "latex_symbols" }
+local sources_default = { "lazydev", "lsp", "snippets", "path", "buffer", "spell", "tmux", "latex_symbols" }
 if use_copilot then
 	table.insert(sources_default, 1, "copilot")
 end
@@ -94,14 +94,29 @@ local opts = {
 			ripgrep = {
 				module = "blink-ripgrep",
 				name = "Ripgrep",
+				async = true,
+				enabled = function()
+					local name = vim.api.nvim_buf_get_name(0)
+					return vim.bo.buftype == "" and not vim.startswith(name, vim.fn.expand("~/Documents/remotes/"))
+				end,
 				opts = {
-					prefix_min_len = 3,
+					prefix_min_len = 4,
+					project_root_marker = { ".git", ".rg-root" },
 					backend = {
-						use = "gitgrep-or-ripgrep",
+						-- The mixed backend loses the search cancellation callback.
+						use = "ripgrep",
+						context_size = 3,
 						ripgrep = {
+							project_root_fallback = false,
+							ignore_paths = { vim.fn.expand("~"), "/" },
 							max_filesize = "200K",
-							context_size = 3,
-							additional_rg_options = { "--max-count=5" },
+							additional_rg_options = {
+								"--max-count=5",
+								"--threads=2",
+								"--one-file-system",
+								"--glob=!**/node_modules/**",
+								"--glob=!**/target/**",
+							},
 						},
 					},
 				},
