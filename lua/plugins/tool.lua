@@ -12,16 +12,12 @@ return {
 		cmd = { "Git", "G" },
 	},
 	{
-		"pysan3/fcitx5.nvim",
-		lazy = true,
-		event = "BufReadPost",
+		"keaising/im-select.nvim",
+		-- Save the current input method before the first InsertEnter restoration.
+		event = { "InsertLeave", "CmdlineLeave" },
 		cond = vim.fn.executable("fcitx5-remote") == 1,
-		main = "fcitx5",
-		opts = {
-			log = "warn",
-			remember_prior = true,
-			define_autocmd = true,
-		},
+		main = "im_select",
+		opts = {},
 	},
 	{
 		"ibhagwan/smartyank.nvim",

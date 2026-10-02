@@ -86,11 +86,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 		vim.bo[event.buf].undofile = false
 	end,
 })
-vim.api.nvim_create_autocmd({ "InsertLeave", "BufCreate", "BufEnter", "BufLeave" }, {
-	group = buffers,
-	command = "silent !fcitx5-remote -c",
-})
-
 local windows = vim.api.nvim_create_augroup("_wins", { clear = true })
 vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "InsertLeave" }, {
 	group = windows,
