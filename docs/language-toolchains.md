@@ -20,6 +20,10 @@
 
 ## C/C++：clice
 
+`mason_tools` 将 clice 固定为 `v0.1.2026100208`：Mason 注册表默认的
+`v0.1.2026082603` 下载地址已返回 404。修改版本后执行 `:MasonToolsInstall`，
+会安装清单中指定的版本。
+
 `lua/plugins/lsp.lua` 的 `servers.clice` 定义 `clice serve`、C/C++ 文件类型、项目根标记和补全 capabilities。
 旧 clangd 配置以及 clangd 专用命令已移除；clangd 仍然安装着也不会由本配置自动启用。
 

@@ -248,7 +248,8 @@ settings["disabled_lsp_servers"] = { "clangd", "ts_ls", "vtsls", "tsgo", "eslint
 settings["mason_tools"] = {
 	-- Language servers
 	"bash-language-server",
-	"clice",
+	-- Mason's default release v0.1.2026082603 is unavailable (HTTP 404).
+	{ "clice", version = "v0.1.2026100208" },
 	"gopls",
 	"golangci-lint-langserver",
 	"html-lsp",
