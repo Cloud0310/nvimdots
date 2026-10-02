@@ -263,151 +263,45 @@ function M.gen_cursorword_hl()
 	set_global_hl("MiniCursorwordCurrent", nil)
 end
 
----Get LSP capabilities merged with blink.cmp capabilities.
----@return lsp.ClientCapabilities
-function M.get_lsp_capabilities()
-	return vim.tbl_deep_extend(
-		"force",
-		vim.lsp.protocol.make_client_capabilities(),
-		require("blink.cmp").get_lsp_capabilities({}, false)
-	)
-end
-
----Setup and enable a language server in one call.
----@param server string @Name of the language server
----@param config? vim.lsp.Config @Optional config to apply
-function M.register_server(server, config)
-	vim.validate("server", server, "string", false)
-	vim.validate("config", config, "table", true)
-
-	if config then
-		vim.lsp.config(server, config)
-	end
-	vim.lsp.enable(server)
-end
-
----Convert number (0/1) to boolean
----@param value number @The value to check
----@return boolean|nil @Returns nil if failed
-function M.tobool(value)
-	if value == 0 then
-		return false
-	elseif value == 1 then
-		return true
-	else
-		vim.notify(
-			"Attempting to convert data of type '" .. type(value) .. "' [other than 0 or 1] to boolean",
-			vim.log.levels.ERROR,
-			{ title = "[utils] Runtime Error" }
-		)
-		return nil
+-- Missing overrides are optional; errors inside existing overrides must propagate.
+local function optional_require(name)
+	if package.loaded[name] ~= nil or package.preload[name] or vim.loader.find(name)[1] then
+		return require(name)
 	end
 end
 
---- Function to recursively merge src into dst
---- Unlike vim.tbl_deep_extend(), this function extends if the original value is a list
----@param dst table @Table which will be modified and appended to
----@param src table @Table from which values will be inserted
----@return table @Modified table
-local function tbl_recursive_merge(dst, src)
-	for key, value in pairs(src) do
-		if type(dst[key]) == "table" and type(value) == "function" then
-			dst[key] = value(dst[key])
-		elseif type(dst[key]) == "table" and vim.islist(dst[key]) and key ~= "dashboard_image" then
-			vim.list_extend(dst[key], value)
-		elseif type(dst[key]) == "table" and type(value) == "table" and not vim.islist(dst[key]) then
-			tbl_recursive_merge(dst[key], value)
-		else
-			dst[key] = value
-		end
-	end
-	return dst
-end
-
--- Function to extend existing core configs (settings, events, etc.)
----@param config table @The default config to be merged with
----@param user_config string @The module name used to require user config
----@return table @Extended config
+-- Native merge semantics: dictionaries merge, lists replace, functions remain values.
 function M.extend_config(config, user_config)
-	local ok, extras = pcall(require, user_config)
-	if ok and type(extras) == "table" then
-		config = tbl_recursive_merge(config, extras)
-	elseif not ok and type(extras) == "string" and not extras:find("module .* not found") then
-		vim.notify(
-			string.format("[utils] Error loading %s: %s", user_config, extras),
-			vim.log.levels.ERROR,
-			{ title = "[utils] Runtime Error" }
-		)
+	local extras = optional_require(user_config)
+	if extras == nil then
+		return config
 	end
-	return config
+	assert(type(extras) == "table", user_config .. " must return a table")
+	return vim.tbl_deep_extend("force", {}, config, extras)
 end
 
----@param plugin_name string @Module name of the plugin (used to setup itself)
----@param opts nil|table @The default config to be merged with
----@param vim_plugin? boolean @If this plugin is written in vimscript or not
----@param setup_callback? function @Add new callback if the plugin needs unusual setup function
-function M.load_plugin(plugin_name, opts, vim_plugin, setup_callback)
-	vim_plugin = vim_plugin or false
-
-	-- Get the file name of the default config
-	local fname = debug.getinfo(2, "S").source:match("[^@/\\]*.lua$")
-	local ok, user_config = pcall(require, "user.configs." .. fname:sub(0, #fname - 4))
-	if ok and vim_plugin then
-		if user_config == false then
-			-- Return early if the user explicitly requires disabling plugin setup
-			return
-		elseif type(user_config) == "function" then
-			-- OK, setup as instructed by the user
-			user_config()
-		else
-			vim.notify(
-				string.format(
-					"<%s> is not a typical Lua plugin, please return a function with\nthe corresponding options defined instead (usually via `vim.g.*`)",
-					plugin_name
-				),
-				vim.log.levels.ERROR,
-				{ title = "[utils] Runtime Error (User Config)" }
-			)
-		end
-	elseif not vim_plugin then
-		if user_config == false then
-			-- Return early if the user explicitly requires disabling plugin setup
-			return
-		else
-			setup_callback = setup_callback or require(plugin_name).setup
-			-- User config exists?
-			if ok then
-				-- Extend base config if the returned user config is a table
-				if type(user_config) == "table" then
-					opts = tbl_recursive_merge(opts, user_config)
-					setup_callback(opts)
-				-- Replace base config if the returned user config is a function
-				elseif type(user_config) == "function" then
-					local user_opts = user_config(opts)
-					if type(user_opts) == "table" then
-						setup_callback(user_opts)
-					end
-				else
-					vim.notify(
-						string.format(
-							[[
-Please return a `table` if you want to override some of the default options OR a
-`function` returning a `table` if you want to replace the default options completely.
-
-We received a `%s` for plugin <%s>.]],
-							type(user_config),
-							plugin_name
-						),
-						vim.log.levels.ERROR,
-						{ title = "[utils] Runtime Error (User Config)" }
-					)
-				end
-			else
-				-- Nothing provided... Fallback as default setup of the plugin
-				setup_callback(opts)
-			end
-		end
+-- Optional per-plugin overrides; plugins with global configuration use a callback.
+function M.load_plugin(plugin_name, opts, vim_plugin)
+	local fname = debug.getinfo(2, "S").source:match("([^@/\\]+)%.lua$")
+	local override = optional_require("user.configs." .. fname)
+	if override == false then
+		return
 	end
+	if vim_plugin then
+		if override ~= nil then
+			assert(type(override) == "function", plugin_name .. " override must be a function")
+			override()
+		end
+		return
+	end
+	if type(override) == "function" then
+		opts = override(opts)
+		assert(type(opts) == "table", plugin_name .. " override must return options")
+	elseif override ~= nil then
+		assert(type(override) == "table", plugin_name .. " override must return a table or function")
+		opts = vim.tbl_deep_extend("force", {}, opts or {}, override)
+	end
+	require(plugin_name).setup(opts)
 end
 
 return M

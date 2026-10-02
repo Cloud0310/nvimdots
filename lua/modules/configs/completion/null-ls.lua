@@ -1,41 +1,7 @@
 return function()
 	local null_ls = require("null-ls")
-	local btns = null_ls.builtins
-
-	---Return formatter args required by `extra_args`
-	---@param formatter_name string
-	---@return table|nil
-	local function formatter_args(formatter_name)
-		local ok, args = pcall(require, "user.configs.formatters." .. formatter_name)
-		if not ok then
-			args = require("completion.formatters." .. formatter_name)
-		end
-		return args
-	end
-
-	-- Please set additional flags for the supported servers here
-	-- Don't specify any config here if you are using the default one.
-	local sources = {
-		btns.formatting.clang_format.with({
-			filetypes = { "c", "cpp", "objc", "objcpp", "cs", "cuda", "proto" },
-			extra_args = formatter_args("clang_format"),
-		}),
-		btns.formatting.prettier.with({
-			filetypes = {
-				"vue",
-				"typescript",
-				"javascript",
-				"typescriptreact",
-				"javascriptreact",
-				"yaml",
-				"html",
-				"css",
-				"scss",
-				"sh",
-				"markdown",
-			},
-		}),
-	}
+	-- Diagnostics only. Conform owns all external formatting; Mason tools are installed separately.
+	local sources = { null_ls.builtins.diagnostics.vint }
 	require("modules.utils").load_plugin("null-ls", {
 		border = "rounded",
 		debug = false,
@@ -44,8 +10,6 @@ return function()
 		sources = sources,
 		default_timeout = require("core.settings").format_timeout,
 	})
-
-	require("completion.mason-null-ls").setup()
 
 	-- Setup usercmd to register/deregister available source(s)
 	local function _gen_completion()
@@ -72,6 +36,4 @@ return function()
 		nargs = 1,
 		complete = _gen_completion,
 	})
-
-	require("completion.formatting").configure_format_on_save()
 end

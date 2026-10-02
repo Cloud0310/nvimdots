@@ -50,13 +50,7 @@ M.toggle_inlayhint = function()
 end
 
 M.toggle_virtuallines = function()
-	require("tiny-inline-diagnostic").toggle()
-	vim.notify(
-		"Virtual lines are now "
-			.. (require("tiny-inline-diagnostic.state").user_toggle_state and "displayed" or "hidden"),
-		vim.log.levels.INFO,
-		{ title = "LSP Diagnostic" }
-	)
+	require("core.diagnostics").toggle_virtual_lines()
 end
 
 local _lazygit = nil

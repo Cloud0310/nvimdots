@@ -76,28 +76,23 @@ settings["ai_adapters"] = {
 }
 
 -- Default CodeCompanion adapter. Must be a key in `ai_adapters`.
--- The hyphenated key `codecompanion-adapter` is also accepted in user settings.
 ---@type string
 settings["codecompanion_adapter"] = "openrouter"
 
 -- Completion prediction backend.
 -- Valid values: `copilot`, `oai-compatible`.
--- The hyphenated key `edit-prediction-source` is also accepted in user settings.
 ---@type "copilot"|"oai-compatible"
 settings["edit_prediction_source"] = "oai-compatible"
 
 -- Default adapter for Minuet prediction. Must be a key in `ai_adapters`.
--- The hyphenated key `pred-adapter` is also accepted in user settings.
 ---@type string
 settings["pred_adapter"] = "opencode"
 
 -- Model used by Minuet completion prediction.
--- The hyphenated key `pred-model` is also accepted in user settings.
 ---@type string
 settings["pred_model"] = "deepseek-v4-flash"
 
 -- Extra request parameters for Minuet completion prediction.
--- The hyphenated key `pred-optional-params` is also accepted in user settings.
 --
 -- Examples for disabling thinking/reasoning:
 --   OpenRouter: { reasoning = { effort = "none" } }
@@ -120,35 +115,29 @@ settings["format_on_save"] = true
 ---@type number
 settings["format_timeout"] = 1000
 
--- Set to false to disable format notification.
+-- Set to false to disable successful manual-format notifications (errors are always shown).
 ---@type boolean
 settings["format_notify"] = true
 
--- Set to true if you want to format ONLY the *changed lines* as defined by your version control system.
--- NOTE: This will only be respected if:
---  > The buffer is under version control (Git or Mercurial);
---  > Any server attached to the buffer supports the |DocumentRangeFormattingProvider| capability.
--- Otherwise, Neovim will fall back to formatting the whole buffer and issue a warning.
----@type boolean
-settings["format_modifications_only"] = false
-
--- Filetypes in this list will skip LSP formatting if the value is true.
+-- Filetypes in this list will skip both external and LSP formatting if the value is true.
 ---@type table<string, boolean>
 settings["formatter_block_list"] = {
 	-- Example
 	lua = false,
 }
 
--- Servers in this list will skip formatting capabilities if the value is true.
+-- LSP clients excluded from Conform's fallback formatting. External formatters are unaffected.
 ---@type table<string, boolean>
 settings["server_formatting_block_list"] = {
-	clangd = true,
+	clice = true, -- clang-format owns C/C++ formatting
 	lua_ls = true,
-	ruff = false, -- set to false to enable ruff formatting, see discussion #1485
-	ts_ls = true,
+	ruff = false,
+	tsc = true, -- Oxfmt owns JS/TS formatting
+	oxlint = true,
+	tombi = true, -- Conform invokes tombi format directly
 }
 
--- Directories where formatting on save is disabled.
+-- Directories where both manual and save-time formatting are disabled.
 -- NOTE: Strings may contain regular expressions (vim regex). |regexp|
 -- NOTE: Directories are automatically normalized using |vim.fs.normalize()|.
 ---@type string[]
@@ -157,8 +146,8 @@ settings["format_disabled_dirs"] = {
 	"~/format_disabled_dir",
 }
 
--- Set to false to disable virtual lines for diagnostics.
--- You can still view diagnostics using trouble.nvim (`<leader>ld`).
+-- Show native virtual lines on the current line, virtual text on other lines (Neovim 0.12+).
+-- Set to false to hide both virtual displays; signs, underline, floats and Trouble remain available.
 ---@type boolean
 settings["diagnostics_virtual_lines"] = true
 
@@ -215,40 +204,51 @@ settings["search_backend"] = "telescope"
 ---@type boolean
 settings["lsp_inlayhints"] = false
 
--- LSPs to install during bootstrap.
--- Full list: https://github.com/neovim/nvim-lspconfig/tree/master/lua/lspconfig/configs
+-- Do not auto-enable replaced servers even if their packages remain installed in Mason.
+-- Oxfmt runs through Conform, not a second formatting LSP. Rust has its own owner.
 ---@type string[]
-settings["lsp_deps"] = {
-	"bashls",
-	"clangd",
+settings["disabled_lsp_servers"] = { "clangd", "ts_ls", "vtsls", "tsgo", "eslint", "taplo", "oxfmt" }
+
+-- Single installation manifest, using Mason package names (not LSP/none-ls/DAP aliases).
+-- Installation does not select a formatter or configure a debugger.
+-- Installed language servers are configured by completion/lsp.lua;
+-- rust-analyzer remains owned by rustaceanvim.
+-- user.settings uses native deep-merge semantics: dictionaries merge, lists replace.
+---@type (string|table)[]
+settings["mason_tools"] = {
+	-- Language servers
+	"bash-language-server",
+	"clice",
 	"gopls",
-	"html",
-	"jsonls",
-	"lua_ls",
+	"golangci-lint-langserver",
+	"html-lsp",
+	"json-lsp",
+	"yaml-language-server",
+	"marksman",
+	"tombi",
+	"tsc", -- TypeScript 7+ includes the native language server
+	"oxlint",
+	"lua-language-server",
 	"ruff",
 	"pyrefly",
-}
-
--- General-purpose sources for none-ls to install during bootstrap.
--- Supported sources: https://github.com/nvimtools/none-ls.nvim/tree/main/lua/null-ls/builtins
----@type string[]
-settings["null_ls_deps"] = {
-	"clang_format",
-	"gofumpt",
-	"goimports",
-	"prettier",
+	"rust-analyzer",
+	-- Formatters and diagnostics
+	"clang-format",
+	"goimports", -- followed by gopls formatting with gofumpt=true
+	"gomodifytags",
+	"gotests",
+	"iferr",
+	"impl",
+	"golangci-lint",
+	"oxfmt", -- npm distribution is required for Markdown/HTML/Vue support
 	"shfmt",
 	"stylua",
-	"vint",
-}
-
--- Debug Adapter Protocol (DAP) clients to install and configure during bootstrap.
--- Supported DAPs: https://github.com/jay-babu/mason-nvim-dap.nvim/blob/main/lua/mason-nvim-dap/mappings/source.lua
----@type string[]
-settings["dap_deps"] = {
-	"codelldb", -- C-Family
-	"delve", -- Go
-	"python", -- Python (debugpy)
+	"vint", -- none-ls diagnostics only
+	-- Debug adapters (mason-nvim-dap only configures them)
+	"codelldb",
+	"delve",
+	"debugpy",
+	"js-debug-adapter", -- Neotest Vitest/Jest debug strategy
 }
 
 -- Treesitter parsers to install during bootstrap.
@@ -261,6 +261,8 @@ settings["treesitter_deps"] = {
 	"css",
 	"go",
 	"gomod",
+	"gosum",
+	"gowork",
 	"html",
 	"javascript",
 	"json",
@@ -271,6 +273,8 @@ settings["treesitter_deps"] = {
 	"markdown_inline",
 	"python",
 	"rust",
+	"toml",
+	"tsx",
 	"typescript",
 	"vimdoc",
 	"vue",

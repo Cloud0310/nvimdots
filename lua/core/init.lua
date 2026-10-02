@@ -110,6 +110,7 @@ local load_core = function()
 	shell_config()
 
 	require("core.options")
+	require("core.diagnostics").setup()
 	require("core.event")
 	require("core.pack")
 	require("keymap")

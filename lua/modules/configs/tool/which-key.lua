@@ -63,6 +63,7 @@ return function()
 		spec = {
 			{ "<leader>g", group = icons.git.Git .. "Git" },
 			{ "<leader>d", group = icons.ui.Bug .. " Debug" },
+			{ "<leader>T", group = "Tests" },
 			{ "<leader>s", group = icons.cmp.tmux .. "Session" },
 			{ "<leader>b", group = icons.ui.Buffer .. " Buffer" },
 			{ "<leader>S", group = icons.ui.Search .. " Search" },

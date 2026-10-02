@@ -1,6 +1,6 @@
 return function()
 	require("modules.utils").load_plugin("persisted", {
-		save_dir = vim.fn.expand(vim.fn.stdpath("data") .. "/sessions/"),
+		save_dir = vim.fn.stdpath("data") .. "/sessions/",
 		autostart = true,
 		-- Set `lazy = false` in `plugins/editor.lua` to enable this
 		autoload = false,

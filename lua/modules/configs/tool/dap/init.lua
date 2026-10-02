@@ -52,6 +52,10 @@ return function()
 	---@param config table
 	local function mason_dap_handler(config)
 		local dap_name = config.name
+		-- nvim-dap-go owns Delve configuration; don't create a second Go adapter.
+		if dap_name == "delve" then
+			return
+		end
 		local ok, custom_handler = pcall(require, "user.configs.dap-clients." .. dap_name)
 		if not ok then
 			-- Use preset if there is no user definition
@@ -82,7 +86,8 @@ return function()
 	end
 
 	require("modules.utils").load_plugin("mason-nvim-dap", {
-		ensure_installed = require("core.settings").dap_deps,
+		-- mason-tool-installer owns installation; keep this bridge for adapter setup only.
+		ensure_installed = {},
 		automatic_installation = false,
 		handlers = { mason_dap_handler },
 	})

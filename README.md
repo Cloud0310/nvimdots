@@ -100,6 +100,8 @@ It's strongly recommended to read [Wiki: Prerequisites](https://github.com/ayami
 
 ## ⚙️ Configuration & Usage
 
+> Local toolchain changes: [Mason tool installation, Conform formatting, and native diagnostics](docs/toolchain-migration.md).
+
 <h3 align="center">
     🗺️ Keybindings
 </h3>

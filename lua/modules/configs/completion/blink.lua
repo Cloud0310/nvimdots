@@ -4,7 +4,7 @@ local icons = {
 	cmp = require("modules.utils.icons").get("cmp"),
 }
 local settings = require("core.settings")
-local edit_prediction_source = settings["edit-prediction-source"] or settings.edit_prediction_source
+local edit_prediction_source = settings.edit_prediction_source
 local use_copilot = settings.use_copilot and edit_prediction_source == "copilot"
 local use_minuet = edit_prediction_source == "oai-compatible"
 

@@ -32,5 +32,5 @@ return function()
 	}
 
 	dap.configurations.cpp = dap.configurations.c
-	dap.configurations.rust = dap.configurations.c
+	-- rustaceanvim owns Cargo-aware Rust configurations.
 end

@@ -12,7 +12,7 @@ end
 
 function M.get_adapter_api_key(adapter)
 	local settings = get_settings()
-	return adapter.api_key or settings["ai-api-key"] or settings.ai_api_key
+	return adapter.api_key or settings.ai_api_key
 end
 
 function M.get_adapter_endpoint(adapter)
@@ -30,12 +30,12 @@ end
 
 function M.get_codecompanion_adapter_name()
 	local settings = get_settings()
-	return settings["codecompanion-adapter"] or settings.codecompanion_adapter or "openrouter"
+	return settings.codecompanion_adapter
 end
 
 function M.get_prediction_adapter_name()
 	local settings = get_settings()
-	return settings["pred-adapter"] or settings.pred_adapter or M.get_codecompanion_adapter_name()
+	return settings.pred_adapter or M.get_codecompanion_adapter_name()
 end
 
 function M.get_codecompanion_models()
@@ -59,8 +59,8 @@ end
 function M.get_prediction_config()
 	local settings = get_settings()
 	local adapter = M.get_adapter(M.get_prediction_adapter_name())
-	local pred_model = settings["pred-model"] or settings.pred_model
-	local pred_optional_params = settings["pred-optional-params"] or settings.pred_optional_params or {}
+	local pred_model = settings.pred_model
+	local pred_optional_params = settings.pred_optional_params or {}
 
 	if adapter and (adapter.type == "openai-compatible" or adapter.type == "openai-fim-compatible") then
 		return {
