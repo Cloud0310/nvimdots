@@ -25,8 +25,8 @@ in
     programs.neovim = {
       nvimdots = {
         enable = mkEnableOption ''
-          Activate "ayamir/nvimdots".
-          Have a look at https://github.com/ayamir/nvimdots for details
+          Activate "Cloud0310/nvimdots".
+          Have a look at https://github.com/Cloud0310/nvimdots for details
         '';
         bindLazyLock = mkEnableOption ''
           Bind lazy-lock.json in your repository to $XDG_CONFIG_HOME/nvim.
@@ -36,11 +36,10 @@ in
         '';
         mergeLazyLock = mkEnableOption ''
           Merges the managed lazy-lock.json with the existing one under $XDG_CONFIG_HOME/nvim if its hash has changed on activation.
-          Upstream package version changes have high priority.
+          Repository package version changes have high priority.
           This means changes to lazy-lock.json in the config directory (likely due to installing package) will be preserved.
           In other words, it achieves environment consistency while remaining adaptable to changes.
           You need to unlink lazy-lock.json before enabling this option if `bindLazyLock` is set.
-          Please refer to the wiki for details on the behavior.
         '';
         setBuildEnv = mkEnableOption ''
           Sets environment variables that resolve build dependencies as required by `mason.nvim` and `nvim-treesitter`

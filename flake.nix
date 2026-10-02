@@ -1,5 +1,5 @@
 {
-  description = "Provide nixosModules for ayamir/nvimdots";
+  description = "Home Manager module for Cloud0310/nvimdots";
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
