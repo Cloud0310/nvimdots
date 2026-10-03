@@ -33,6 +33,23 @@ return {
 		end,
 	},
 	{
+		"chrisgrieser/nvim-various-textobjs",
+		keys = {
+			{
+				"iS",
+				"<Cmd>lua require('various-textobjs').subword('inner')<CR>",
+				mode = { "x", "o" },
+				desc = "editxo: Select inner subword",
+			},
+			{
+				"aS",
+				"<Cmd>lua require('various-textobjs').subword('outer')<CR>",
+				mode = { "x", "o" },
+				desc = "editxo: Select subword with separator",
+			},
+		},
+	},
+	{
 		"m4xshen/autoclose.nvim",
 		lazy = true,
 		event = "InsertEnter",

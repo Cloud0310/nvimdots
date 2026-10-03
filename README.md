@@ -60,6 +60,7 @@ The leader key is Space. `<C-p>` opens the command and keymap picker.
 | `<C-n>` | Toggle file explorer |
 | `<leader>ff` / `<leader>fp` | Find files / search text |
 | `<A-i>` / `<A-o>` | Next / previous buffer |
+| `iS` / `aS` (visual or operator-pending) | Select subword / include its separator |
 | `:Format` / `<A-S-f>` | Format buffer |
 | `:FormatToggle` / `<A-f>` | Toggle format on save |
 | `:ConformInfo` | Inspect formatter selection and logs |
